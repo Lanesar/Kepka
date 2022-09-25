@@ -1,24 +1,30 @@
 from rest_framework import serializers
-from .models import  User
-from django.core.paginator import Paginator
+from .models import User
+from django.contrib.auth.password_validation import validate_password
 
 
-class UserSerializer(serializers.Serializer):
-    id = serializers.PrimaryKeyRelatedField(read_only=True)
-    name = serializers.CharField(max_length=30, min_length=8)
+class UserRegisterSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(max_length=35)
     phone = serializers.CharField(max_length=13)
-    password = serializers.CharField(min_length=8, max_length=25)
+    password = serializers.CharField(
+        validators=[validate_password], write_only=True, required=True
+    )
+    password2 = serializers.CharField(max_length=255, write_only=True)
 
     class Meta:
         model = User
-        fields = ["id", "name", "phone", "password"]
-        extra_kwargs = {"password": {"write_only": True}}
+        fields = ["name", "phone", "password", "password2"]
+
+    def validate(self, attrs):
+        if attrs["password2"] != attrs["password"]:
+            raise serializers.ValidationError("Passwords didnt match!")
+        return attrs
 
     def create(self, validated_data):
-        user = User.objects.create_user(**validated_data)
-        return user
+        return User.objects.create_user(
+            name=validated_data["name"],
+            phone=validated_data["phone"],
+            password=validated_data["password"],
+        )
 
 
-class LoginSerializer(serializers.Serializer):
-    phone = serializers.CharField(max_length=30)
-    password = serializers.CharField()
