@@ -28,7 +28,7 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     id = models.AutoField(primary_key=True, unique=True)
-    name = models.CharField(max_length=30, unique=True)
+    name = models.CharField(max_length=30)
     photo = models.ImageField(
         default="media/avatar.jpg", upload_to="media/upload_to_user_media"
     )
