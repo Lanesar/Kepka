@@ -14,8 +14,26 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.conf.urls.static import static
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
+from catalog_api import views
+from .routers import urls
+from . import settings
+router = DefaultRouter()
+router.register(r'product', views.ProductViewSet, basename='product')
+router.register(r'messager', views.MessengerViewSet, 'messanger')
+router.register('cart', views.CartViewSet, basename='cart')
+router.register('cart_product', views.CartProductViewSet, basename='cart_product')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path(r'ckeditor/', include('ckeditor_uploader.urls')),
+    path(r'api/v1/slider', views.SlidersListView.as_view()),
+    path(r'api/v1/bestseller', views.BestsellerViewSet.as_view()),
+    path(r'api/v1/stock', views.StockViewSet.as_view()),
+
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
